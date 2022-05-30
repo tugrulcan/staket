@@ -1,8 +1,6 @@
 name: Pre-commit auto-update
 
-on:
-  schedule:
-    - cron: "0 18 * * *"
+on: [push]
 
 jobs:
   auto-update:
@@ -10,7 +8,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v3
+      - name: Setup python environment
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.8.9"
+          cache: 'pip'
 
       - uses: browniebroke/pre-commit-autoupdate-action@main
 
