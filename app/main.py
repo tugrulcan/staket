@@ -5,4 +5,4 @@ app = FastAPI()  # pragma: no cover
 
 @app.get("/")
 async def read_root() -> str:  # pragma: no cover
-    return "Hello, World!"
+    return "Hello world from deta!"
