@@ -17,6 +17,11 @@ repos:
       - id: requirements-txt-fixer
       - id: trailing-whitespace
 
+  -   repo: https://github.com/asottile/setup-cfg-fmt
+      rev: v1.20.1
+      hooks:
+      -   id: setup-cfg-fmt
+
   - repo: https://github.com/pycqa/isort
     rev: '5.10.1'
     hooks:
@@ -31,7 +36,6 @@ repos:
     rev: "v1.3.3"
     hooks:
     - id: pycln
-      args: [--all]
 
   - repo: https://github.com/pycqa/flake8
     rev: '4.0.1'
@@ -44,6 +48,7 @@ repos:
             - pep8-naming==0.12.1
             - flake8-print==4.0.0
             - flake8-fastapi==0.6.1
+            - flake8-keyword-arguments==0.1.0
 
   - repo: https://github.com/asottile/yesqa
     rev: "v1.3.0"
@@ -71,3 +76,5 @@ repos:
     rev: "v0.960"
     hooks:
     - id: mypy
+      additional_dependencies:
+        - sqlalchemy-stubs==0.4
