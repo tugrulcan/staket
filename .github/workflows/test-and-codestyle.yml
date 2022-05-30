@@ -1,0 +1,60 @@
+name: Workflow to run code style checkers and tests
+on: [push]
+jobs:
+  code-style:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup python environment
+        uses: actions/setup-python@v3.1.2
+        with:
+          python-version: "3.8.9"
+          cache: 'pip'
+
+      - name: Upgrade pip
+        run: |
+          pip install --upgrade pip
+
+      - name: Install python dependencies
+        run: |
+          make requirements
+
+      - name: Run formatters
+        uses: pre-commit/action@v2.0.3
+        with:
+          extra_args: --all-files
+
+  test:
+    needs:
+      - code-style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup python environment
+        uses: actions/setup-python@v3.1.2
+        with:
+          python-version: "3.8.9"
+          cache: 'pip'
+
+      - name: Upgrade pip
+        run: |
+          pip install --upgrade pip
+
+      - name: Install dependencies
+        run: |
+          make requirements
+
+      - name: Run tests and generates coverage report
+        run: |
+          make test
+          pwd && ls
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          files: ./app/coverage.xml
