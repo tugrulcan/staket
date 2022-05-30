@@ -57,3 +57,10 @@ jobs:
           fail_ci_if_error: true # optional (default = false)
           verbose: true # optional (default = false)
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+
+  deploy-production:
+    needs: [ code-style,test ]
+    if: ${{ github.ref == 'refs/heads/main' }}
+    uses: tugrulcan/staket/.github/workflows/deployment.yml@main
+    secrets:
+      DETA_TOKEN: ${{ secrets.DETA_TOKEN }}

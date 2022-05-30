@@ -1,0 +1,1 @@
+{"id":"c3172e3e-c22d-468f-bb71-113aeb69923a","space":23876,"runtime":"python3.9","name":"app","path":"tqsdq1","project":"a0ukb75b","account":"144798365827","region":"eu-central-1","deps":["fastapi==0.78.0","pydantic==1.9.1","requests==2.27.1","starlette==0.19.1","uvicorn[standard]==0.17.6"],"envs":null,"public":true,"log_level":"off","cron":""}
