@@ -79,6 +79,10 @@ clean:            ## Clean unused files.
 .PHONY: check
 check: clean run-all-pre-commit-hooks test     ## Runs all checks
 
+.PHONY: upgrade-db
+upgrade-db:
+	alembic upgrade head   ## Runs alembic to upgrade to head version
+
 .PHONY: virtualenv
 virtualenv:       ## Create a virtual environment.
 	@if [ "$(USING_POETRY)" ]; then poetry install && exit; fi

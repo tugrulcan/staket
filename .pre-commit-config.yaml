@@ -54,7 +54,7 @@ repos:
             - flake8-import-order==0.18.1
             - pep8-naming==0.12.1
             - flake8-print==4.0.0
-            - flake8-fastapi==0.6.1
+            # - flake8-fastapi==0.6.1
             - flake8-keyword-arguments==0.1.0
 
   - repo: https://github.com/asottile/yesqa

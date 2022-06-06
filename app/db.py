@@ -1,27 +1,30 @@
-from typing import Generator
-
 from fastapi import Depends
-from sqlalchemy import create_engine
-from sqlalchemy.engine.base import Connectable
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
 
+from app.models import *  # noqa
 from app.settings import settings
 
-engine = create_engine(
+engine = create_async_engine(
     url=settings.SQLALCHEMY_DATABASE_URI,
     echo=True,
+    future=True,
 )
 
 
-def create_db_and_tables(bind: Connectable) -> None:
-    SQLModel.metadata.create_all(bind=bind)
+async def create_db_and_tables() -> None:
+    async with engine.begin() as conn:
+        # await conn.run_sync(SQLModel.metadata.drop_all)
+        await conn.run_sync(SQLModel.metadata.create_all)
 
 
-def get_session() -> Generator[Session, None, None]:
-    with Session(bind=engine) as session:  # type: ignore
-        with session.begin():
-            yield session
+async def get_session() -> AsyncSession:
+    async_session = sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
+    async with async_session() as session:
+        yield session
 
 
 ActiveSession = Depends(get_session)

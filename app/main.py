@@ -1,11 +1,14 @@
-from typing import Dict
+from typing import List
 
 import better_exceptions
 
-from fastapi import FastAPI, HTTPException, Response, status
-from sqlalchemy.orm import Session
+from fastapi import FastAPI, HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.responses import RedirectResponse, Response
 
 from app.db import ActiveSession
+from app.models import User, UserCreate
 
 better_exceptions.MAX_LENGTH = None
 
@@ -31,18 +34,13 @@ app = FastAPI(
 
 
 @app.get("/")
-async def root() -> Dict[str, str]:
-    return {"message": "Hello, World!"}
-
-
-@app.get("/hello/{name}")
-async def say_hello(name: str) -> Dict[str, str]:
-    return {"message": f"Hello {name}"}
+async def root() -> RedirectResponse:
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/db_ready")
 async def check_db_readiness(
-    session: Session = ActiveSession,
+    session: AsyncSession = ActiveSession,
 ) -> Response:
     if session.is_active:
         return Response(
@@ -54,3 +52,32 @@ async def check_db_readiness(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Database is not ready.",
         )
+
+
+@app.get("/users", response_model=List[User])
+async def get_users(
+    session: AsyncSession = ActiveSession,
+) -> List[User]:
+    result = await session.execute(select(User))
+    users: List[User] = result.scalars().all()
+    return users
+
+
+@app.post("/users")
+async def add_user(
+    user_create_payload: UserCreate,
+    session: AsyncSession = ActiveSession,
+) -> User:
+    user = User(**user_create_payload.dict())
+    result = await session.execute(
+        select(User).where(User.email == user.email)
+    )
+    if result.scalars().first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User with this email already exists.",
+        )
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+    return user
