@@ -2,7 +2,7 @@ from typing import List
 
 import better_exceptions
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import RedirectResponse, Response
@@ -57,8 +57,10 @@ async def check_db_readiness(
 @app.get("/users", response_model=List[User])
 async def get_users(
     session: AsyncSession = ActiveSession,
+    offset: int = 0,
+    limit: int = Query(default=50, lte=50),
 ) -> List[User]:
-    result = await session.execute(select(User))
+    result = await session.execute(select(User).offset(offset).limit(limit))
     users: List[User] = result.scalars().all()
     return users
 
