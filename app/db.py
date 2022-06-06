@@ -1,7 +1,10 @@
+from typing import Generator
+
 from fastapi import Depends
-from sqlmodel import Session
+from sqlalchemy import create_engine
+from sqlalchemy.engine.base import Connectable
+from sqlalchemy.orm import Session
 from sqlmodel import SQLModel
-from sqlmodel import create_engine
 
 engine = create_engine(
     url="ASDASD",
@@ -9,12 +12,12 @@ engine = create_engine(
 )
 
 
-def create_db_and_tables(engine) -> None:
-    SQLModel.metadata.create_all(bind=engine)
+def create_db_and_tables(bind: Connectable) -> None:
+    SQLModel.metadata.create_all(bind=bind)
 
 
-def get_session() -> Session:
-    with Session(bind=engine) as session:
+def get_session() -> Generator[Session, None, None]:
+    with Session(bind=engine) as session:  # type: ignore
         yield session
 
 
