@@ -1,6 +1,8 @@
 name: Pre-commit auto-update
 
-on: [push]
+on:
+  schedule:
+    - cron: "0 18 * * *"
 
 jobs:
   auto-update:
