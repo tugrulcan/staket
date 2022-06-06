@@ -1,6 +1,13 @@
 from typing import Dict
 
-from fastapi import FastAPI
+import better_exceptions
+
+from fastapi import FastAPI, HTTPException, Response, status
+from sqlalchemy.orm import Session
+
+from app.db import ActiveSession
+
+better_exceptions.MAX_LENGTH = None
 
 description = """
 Stacket API helps you do awesome stuff. 🚀
@@ -31,3 +38,19 @@ async def root() -> Dict[str, str]:
 @app.get("/hello/{name}")
 async def say_hello(name: str) -> Dict[str, str]:
     return {"message": f"Hello {name}"}
+
+
+@app.get("/db_ready")
+async def check_db_readiness(
+    session: Session = ActiveSession,
+) -> Response:
+    if session.is_active:
+        return Response(
+            status_code=status.HTTP_200_OK,
+            content="Database is ready.",
+        )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database is not ready.",
+        )
