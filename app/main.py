@@ -1,14 +1,11 @@
-from typing import List
-
 import better_exceptions
 
-from fastapi import FastAPI, HTTPException, Query, status
-from sqlalchemy import select
+from fastapi import FastAPI, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import RedirectResponse, Response
 
 from app.db import ActiveSession
-from app.models import User, UserCreate
+from app.routers.user import router as user_router
 
 better_exceptions.MAX_LENGTH = None
 
@@ -32,6 +29,8 @@ app = FastAPI(
     redoc_url=None,
 )
 
+app.include_router(user_router)
+
 
 @app.get("/")
 async def root() -> RedirectResponse:
@@ -47,39 +46,8 @@ async def check_db_readiness(
             status_code=status.HTTP_200_OK,
             content="Database is ready.",
         )
-    else:
+    else:  # pragma: no cover
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Database is not ready.",
         )
-
-
-@app.get("/users", response_model=List[User])
-async def get_users(
-    session: AsyncSession = ActiveSession,
-    offset: int = 0,
-    limit: int = Query(default=50, lte=50),
-) -> List[User]:
-    result = await session.execute(select(User).offset(offset).limit(limit))
-    users: List[User] = result.scalars().all()
-    return users
-
-
-@app.post("/users")
-async def add_user(
-    user_create_payload: UserCreate,
-    session: AsyncSession = ActiveSession,
-) -> User:
-    user = User(**user_create_payload.dict())
-    result = await session.execute(
-        select(User).where(User.email == user.email)
-    )
-    if result.scalars().first():
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="User with this email already exists.",
-        )
-    session.add(user)
-    await session.commit()
-    await session.refresh(user)
-    return user

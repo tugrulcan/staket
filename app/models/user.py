@@ -6,15 +6,30 @@ from helpers import hash_password, is_hash, verify_password
 
 
 class UserBase(SQLModel):
+    __abstract__ = True
+
     name: str = Field(default=None, max_length=50)
     email: EmailStr = Field(
         sa_column=Column(String(100), unique=True, nullable=False)
     )
-    password: str = Field(sa_column=Column(String(255), nullable=False))
     is_active: bool = Field(default=True)
 
+    class Config:
+        orm_mode = True
 
-class User(UserBase, table=True, table_name="users"):  # type: ignore
+
+class UserDisplay(UserBase):
+    __abstract__ = True
+    id: int
+
+
+class UserCreate(UserBase):
+    password: str = Field(sa_column=Column(String(255), nullable=False))
+
+
+class User(UserCreate, table=True):  # type: ignore
+    __abstract__ = False
+    __tablename__ = "users"
     id: int = Field(
         default=None,
         primary_key=True,
@@ -30,6 +45,5 @@ class User(UserBase, table=True, table_name="users"):  # type: ignore
     def check_password(self, password: str) -> bool:
         return verify_password(self.password, password)
 
-
-class UserCreate(UserBase):
-    pass
+    class Config:
+        orm_mode = True
