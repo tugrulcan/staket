@@ -1,7 +1,7 @@
 import better_exceptions
 
 from fastapi import FastAPI, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 from starlette.responses import RedirectResponse, Response
 
 from app.db import ActiveSession
@@ -10,7 +10,7 @@ from app.routers.user import router as user_router
 better_exceptions.MAX_LENGTH = None
 
 description = """
-Stacket API helps you do awesome stuff. 🚀
+Staket API helps you do awesome stuff. 🚀
 """
 app = FastAPI(
     title="Stacket API",
@@ -20,7 +20,7 @@ app = FastAPI(
     contact={
         "name": "Tugrul Can Söllü",
         "url": "https://www.linkedin.com/in/tugrulcan/",
-        "email": "tugrulcansollu+stacketapi@gmail.com",
+        "email": "tugrulcansollu+staketapi@gmail.com",
     },
     license_info={
         "name": "MIT License",
@@ -39,7 +39,7 @@ async def root() -> RedirectResponse:
 
 @app.get("/db_ready")
 async def check_db_readiness(
-    session: AsyncSession = ActiveSession,
+    session: Session = ActiveSession,
 ) -> Response:
     if session.is_active:
         return Response(

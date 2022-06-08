@@ -26,6 +26,9 @@ class UserDisplay(UserBase):
 class UserCreate(UserBase):
     password: str = Field(sa_column=Column(String(255), nullable=False))
 
+    class Config:
+        orm_mode = True
+
 
 class User(UserCreate, table=True):  # type: ignore
     __abstract__ = False

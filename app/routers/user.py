@@ -1,12 +1,10 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Query, status
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from app.db import ActiveSession
-from app.models import User, UserCreate
-from app.models.user import UserDisplay
+from app.models.user import User, UserCreate, UserDisplay
 
 router = APIRouter(
     tags=[User.__tablename__.capitalize()],
@@ -18,12 +16,11 @@ router = APIRouter(
     path="/", status_code=status.HTTP_200_OK, response_model=List[UserDisplay]
 )
 async def get_all_users(
-    session: AsyncSession = ActiveSession,
+    session: Session = ActiveSession,
     offset: int = 0,
     limit: int = Query(default=50, lte=50),
 ) -> List[UserDisplay]:
-    result = await session.execute(select(User).offset(offset).limit(limit))
-    users: List[User] = result.scalars().all()
+    users = session.query(User).offset(offset).limit(limit).all()
     return [UserDisplay(**user.dict()) for user in users]
 
 
@@ -33,15 +30,16 @@ async def get_all_users(
     response_model=UserDisplay,
 )
 async def get_user(
-    session: AsyncSession = ActiveSession,
+    session: Session = ActiveSession,
     user_id: int = Query(..., gt=0),
 ) -> UserDisplay:
-    result = await session.execute(select(User).where(User.id == user_id))
-    user: User = result.scalars().first()
+    user: Optional[User] = (
+        session.query(User).filter(User.id == user_id).first()
+    )
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id {user_id} not found",
+            detail=f"User with id {user_id} does not exist.",
         )
     return UserDisplay(**user.dict())
 
@@ -51,34 +49,33 @@ async def get_user(
 )
 async def create_user_registration(
     user_create_payload: UserCreate,
-    session: AsyncSession = ActiveSession,
+    session: Session = ActiveSession,
 ) -> UserDisplay:
-    user = User(**user_create_payload.dict())
-    result = await session.execute(
-        select(User).where(User.email == user.email)
-    )
-    if result.scalars().first():
+    user: User = User(**user_create_payload.dict())
+    result = session.query(User).filter(User.email == user.email).first()
+    if result is not None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="User with this email already exists.",
+            detail=f"User with email {user.email} already exists.",
         )
     session.add(user)
-    await session.commit()
-    await session.refresh(user)
+    session.commit()
+    session.refresh(user)
     return UserDisplay(**user.dict())
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
-    session: AsyncSession = ActiveSession,
+    session: Session = ActiveSession,
     user_id: int = Query(..., gt=0),
 ) -> None:
-    result = await session.execute(select(User).where(User.id == user_id))
-    user: User = result.scalars().first()
+    user: Optional[User] = (
+        session.query(User).filter(User.id == user_id).first()
+    )
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User with id {user_id} not found",
         )
-    await session.delete(user)
-    await session.commit()
+    session.delete(user)
+    session.commit()
