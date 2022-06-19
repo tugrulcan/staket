@@ -52,9 +52,9 @@ lint:             ## Run pep8, black, mypy linters.
 
 .PHONY: test
 test:        ## Run tests and generate coverage report.
-	pytest -v --cov-config .coveragerc --cov=app  -l --tb=short --cov-fail-under=100  --cov-report term-missing
-	coverage xml
-	coverage html
+	poetry run pytest -v --cov-config .coveragerc --cov=app  -l --tb=short --cov-fail-under=100  --cov-report term-missing
+	poetry run coverage xml
+	poetry run coverage html
 
 .PHONY: run-all-pre-commit-hooks
 run-all-pre-commit-hooks:    ## Runs all pre-commit hooks
