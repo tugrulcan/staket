@@ -11,3 +11,34 @@ exclude = '''
   | \.venv
 )/
 '''
+
+[tool.poetry]
+name = "staket"
+version = "0.1.0"
+description = "Staket API Helps you do awesome stuff"
+authors = ["tugrulcansollu, <tugrulcansollu@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+alembic = "1.8.0"
+asyncpg = "0.25.0"
+better-exceptions = "0.3.3"
+fastapi = "0.78.0"
+pydantic = "1.9.1"
+requests = "2.27.1"
+sqlmodel = "0.0.6"
+starlette = "0.19.1"
+uvicorn = {version = "0.17.6", extras = ["standard"]}
+email-validator = "^1.2.1"
+setuptools = "^62.6.0"
+
+[tool.poetry.dev-dependencies]
+pre-commit = "2.19.0"
+pytest = "7.1.2"
+pytest-cov = "3.0.0"
+sqlalchemy-stubs = "0.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

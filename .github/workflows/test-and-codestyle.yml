@@ -1,24 +1,25 @@
 name: Workflow to run code style checkers and tests
 on: [push]
+
+env:
+  PYTHON_VERSION: "3.10"
+  POETRY_VERSION: "1.1.13"
+  OS: ubuntu-latest
 jobs:
   code-style:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - name: Setup python environment
-        uses: actions/setup-python@v4
+      - name: Prepare python environment
+        # Use the location in the repository (without action.yml)
+        uses: ./.github/actions/prepare-environment
         with:
-          python-version: "3.8.9"
-          cache: 'pip'
+          python-version: ${{ env.PYTHON_VERSION }}
+          poetry-version: ${{ env.POETRY_VERSION }}
 
-      - name: Upgrade pip
+      - name: Reactivate poetry environment
         run: |
-          pip install --upgrade pip
-
-      - name: Install python dependencies
-        run: |
-          make requirements
+            poetry env use ${{ env.PYTHON_VERSION }}
 
       - name: Run formatters
         uses: pre-commit/action@v3.0.0
@@ -26,27 +27,43 @@ jobs:
           extra_args: --all-files
 
   test:
-    needs:
-      - code-style
     runs-on: ubuntu-latest
+    # https://gist.github.com/jefftriplett/d35e120ef9884bcff61c5ade0740f52d
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: [ '5432:5432' ]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v3
-
-      - name: Setup python environment
-        uses: actions/setup-python@v4
+      - name: Prepare python environment
+        # Use the location in the repository (without action.yml)
+        uses: ./.github/actions/prepare-environment
         with:
-          python-version: "3.8.9"
-          cache: 'pip'
+          python-version: ${{ env.PYTHON_VERSION }}
+          poetry-version: ${{ env.POETRY_VERSION }}
 
-      - name: Upgrade pip
+      - name: Reactivate poetry environment
         run: |
-          pip install --upgrade pip
-
-      - name: Install dependencies
-        run: |
-          make requirements
+            poetry env use ${{ env.PYTHON_VERSION }}
 
       - name: Run tests and generates coverage report
+        env:
+          # The hostname used to communicate with the PostgreSQL service container
+          POSTGRES_HOST: postgres
+          # The default PostgreSQL port
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
         run: |
           make test
           pwd && ls

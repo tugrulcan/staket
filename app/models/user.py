@@ -22,12 +22,12 @@ class User(UserBase, table=True, table_name="users"):  # type: ignore
     )
 
     @validator("password", pre=True)
-    def hash_password(cls, pw: str) -> str:
+    def hash_password(cls, pw: str) -> str:  # pragma: no cover
         if is_hash(pw):
             return pw
         return hash_password(pw)
 
-    def check_password(self, password: str) -> bool:
+    def check_password(self, password: str) -> bool:  # pragma: no cover
         return verify_password(self.password, password)
 
 
