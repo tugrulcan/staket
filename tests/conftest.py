@@ -1,8 +1,11 @@
-from typing import AsyncGenerator, Generator
+from typing import AsyncGenerator, Generator, List
 
+import faker_commerce
 import pytest
 
+from faker import Faker
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import (
     AsyncConnection,
@@ -14,7 +17,14 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlmodel import SQLModel
 
 from app import db
-from app.models import *  # noqa
+
+# from app.models import *
+from app.models.category import (  # noqa
+    Category,
+    CategoryCreate,
+    CategoryDisplay,
+)
+from app.models.user import User, UserCreate, UserDisplay  # noqa
 from app.settings import settings
 
 # Source: https://gist.github.com/kampikd/513f67b0aa757da766b8ad3c795281ee#file-pytest_transactions_full-py  # noqa
@@ -69,3 +79,80 @@ def client(session: Session) -> Generator[TestClient, None, None]:
             yield client
         finally:
             pass
+
+
+@pytest.mark.asyncio
+async def insert_users(
+    session: AsyncSession,
+    count: int = 10,
+    fake: Faker = Faker(),
+) -> List[User]:
+    # session: AsyncSession = await session
+
+    user_create_payloads: List[UserCreate] = [
+        UserCreate(
+            name=fake.name(),
+            email=fake.email(),
+            password=fake.password(),
+            is_active=fake.pybool(),
+        )
+        for _ in range(count)
+    ]
+    # await create_db_and_tables(async_engine=session.bind)
+    result = await session.execute(select(User))
+    users: List[User] = result.scalars().all()
+    assert len(users) == 0, "No users should be present"
+
+    # Insert users in user_create_payloads list
+    for user_create_payload in user_create_payloads:
+        await session.execute(
+            User.__table__.insert().values(**user_create_payload.dict())
+        )
+    result = await session.execute(select(User))
+    await session.commit()
+    users = result.scalars().all()
+
+    assert len(users) == count, (
+        "Number of users should match with the "
+        "number of users inserted into the "
+        "database "
+    )
+
+    return users
+
+
+@pytest.mark.asyncio
+async def insert_categories(
+    session: AsyncSession,
+    count: int = 10,
+    fake: Faker = Faker(),
+) -> List[Category]:
+    fake.add_provider(faker_commerce.Provider)
+    category_create_payloads: List[CategoryCreate] = [
+        CategoryCreate(
+            name=fake.ecommerce_category(),
+        )
+        for _ in range(count)
+    ]
+    result = await session.execute(select(Category))
+    categories: List[Category] = result.scalars().all()
+    assert len(categories) == 0, "No categories should be present"
+
+    # Insert categories in category_create_payloads list
+    for category_create_payload in category_create_payloads:
+        await session.execute(
+            Category.__table__.insert().values(
+                **category_create_payload.dict()
+            )
+        )
+    result = await session.execute(select(Category))
+    await session.commit()
+    categories = result.scalars().all()
+
+    assert len(categories) == count, (
+        "Number of categories should match with the "
+        "number of categories inserted into the "
+        "database "
+    )
+
+    return categories

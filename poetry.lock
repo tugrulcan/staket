@@ -195,6 +195,17 @@ python-versions = ">=3.6"
 python-dateutil = ">=2.4"
 
 [[package]]
+name = "faker-commerce"
+version = "1.0.3"
+description = "Provider for Faker which adds fake commerce product names, prices, categories and descriptions."
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+faker = "*"
+
+[[package]]
 name = "fastapi"
 version = "0.78.0"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
@@ -798,7 +809,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "ae3d89e58af7bafdb36671daef5956f6fc4aa825394e48e8eca085b243c9bd6c"
+content-hash = "625812f3998e555ca85f32c7ce37abfcdd8e446b6a7d74c77c8788447d4cb25b"
 
 [metadata.files]
 alembic = [
@@ -932,6 +943,10 @@ email-validator = [
 faker = [
     {file = "Faker-13.13.0-py3-none-any.whl", hash = "sha256:638b9c362e77bcd8212f0d1434c1940f1e8d6c336fe949add563ba0a154b6310"},
     {file = "Faker-13.13.0.tar.gz", hash = "sha256:f192d238b3b6acb98ee85bd596258a15a171385613b30a7849e5845f8980d722"},
+]
+faker-commerce = [
+    {file = "faker-commerce-1.0.3.tar.gz", hash = "sha256:6eb0a5e7e9dcded86edf96980c56af63bc12f56c3ab860f88eb99a5b53c14073"},
+    {file = "faker_commerce-1.0.3-py3-none-any.whl", hash = "sha256:f76bfcac5ba17c68e15fd6d077d98fdff5087d65d015246db99d1b17efe4a3bd"},
 ]
 fastapi = [
     {file = "fastapi-0.78.0-py3-none-any.whl", hash = "sha256:15fcabd5c78c266fa7ae7d8de9b384bfc2375ee0503463a6febbe3bab69d6f65"},

@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User, UserCreate, UserDisplay
 from app.routers.user import router as user_router
+from tests.conftest import insert_users
 
 
 @pytest.mark.asyncio
@@ -168,43 +169,3 @@ async def test_delete_non_existing_user(
         )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.asyncio
-async def insert_users(
-    session: AsyncSession,
-    count: int = 10,
-    fake: Faker = Faker(),
-) -> List[User]:
-    # session: AsyncSession = await session
-
-    user_create_payloads: List[UserCreate] = [
-        UserCreate(
-            name=fake.name(),
-            email=fake.email(),
-            password=fake.password(),
-            is_active=fake.pybool(),
-        )
-        for _ in range(count)
-    ]
-    # await create_db_and_tables(async_engine=session.bind)
-    result = await session.execute(select(User))
-    users: List[User] = result.scalars().all()
-    assert len(users) == 0, "No users should be present"
-
-    # Insert users in user_create_payloads list
-    for user_create_payload in user_create_payloads:
-        await session.execute(
-            User.__table__.insert().values(**user_create_payload.dict())
-        )
-    result = await session.execute(select(User))
-    await session.commit()
-    users = result.scalars().all()
-
-    assert len(users) == count, (
-        "Number of users should match with the "
-        "number of users inserted into the "
-        "database "
-    )
-
-    return users
