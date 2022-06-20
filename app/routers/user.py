@@ -22,8 +22,7 @@ async def get_all_users(
     limit: int = Query(default=50, lte=50),
 ) -> List[UserDisplay]:
     result = await session.execute(select(User).offset(offset).limit(limit))
-    users: List[UserDisplay] = result.scalars().all()
-    return users
+    return result.scalars().all()
 
 
 @router.get(

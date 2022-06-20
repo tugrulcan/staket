@@ -41,9 +41,7 @@ class User(UserCreate, table=True):  # type: ignore
 
     @validator("password", pre=True)
     def hash_password(cls, pw: str) -> str:  # pragma: no cover
-        if is_hash(pw):
-            return pw
-        return hash_password(pw)
+        return pw if is_hash(pw) else hash_password(pw)
 
     def check_password(self, password: str) -> bool:  # pragma: no cover
         return verify_password(self.password, password)

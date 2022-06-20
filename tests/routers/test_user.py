@@ -153,7 +153,7 @@ async def test_delete_user(
     # Query DB to check if user was deleted
     result = await session.execute(select(User))
     users_in_db: List[User] = result.scalars().all()
-    assert len(users_in_db) == 0, "No users should be present"
+    assert not users_in_db, "No users should be present"
 
 
 @pytest.mark.asyncio
@@ -190,7 +190,7 @@ async def insert_users(
     # await create_db_and_tables(async_engine=session.bind)
     result = await session.execute(select(User))
     users: List[User] = result.scalars().all()
-    assert len(users) == 0, "No users should be present"
+    assert not users, "No users should be present"
 
     # Insert users in user_create_payloads list
     for user_create_payload in user_create_payloads:
