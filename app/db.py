@@ -12,19 +12,22 @@ engine = create_async_engine(
     future=True,
 )
 
-
-async def create_db_and_tables() -> None:
-    async with engine.begin() as conn:
-        # await conn.run_sync(SQLModel.metadata.drop_all)
-        await conn.run_sync(SQLModel.metadata.create_all)
+SessionLocal = sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+    autocommit=False,
+    autoflush=False,
+)
 
 
 async def get_session() -> AsyncSession:
-    async_session = sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
-    async with async_session() as session:
-        yield session
+    try:
+        async with SessionLocal() as session:
+            yield session
+    except Exception as e:
+        print(e)
+        raise e
 
 
 ActiveSession = Depends(get_session)
