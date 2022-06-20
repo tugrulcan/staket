@@ -1,15 +1,11 @@
-from typing import List
-
 import better_exceptions
-from app.routers.user import router as user_router
 
-from fastapi import FastAPI, HTTPException, Query, status
-from sqlalchemy import select
+from fastapi import FastAPI, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import RedirectResponse, Response
 
 from app.db import ActiveSession
-from app.models import User, UserCreate
+from app.routers.user import router as user_router
 
 better_exceptions.MAX_LENGTH = None
 
@@ -34,6 +30,7 @@ app = FastAPI(
 )
 
 app.include_router(user_router)
+
 
 @app.get("/")
 async def root() -> RedirectResponse:

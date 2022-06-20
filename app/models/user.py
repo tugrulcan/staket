@@ -1,6 +1,7 @@
 from pydantic import EmailStr, validator
 from sqlalchemy import Column, String
 from sqlmodel import Field, SQLModel
+
 from helpers import hash_password, is_hash, verify_password
 
 
@@ -37,12 +38,14 @@ class User(UserCreate, table=True):  # type: ignore
         primary_key=True,
         sa_column_kwargs=dict(autoincrement=True),
     )
+
     @validator("password", pre=True)
-    def hash_password(cls, pw: str) -> str:
+    def hash_password(cls, pw: str) -> str:  # pragma: no cover
         if is_hash(pw):
             return pw
         return hash_password(pw)
-    def check_password(self, password: str) -> bool:
+
+    def check_password(self, password: str) -> bool:  # pragma: no cover
         return verify_password(self.password, password)
 
     class Config:

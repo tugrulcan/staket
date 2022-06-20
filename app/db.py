@@ -1,7 +1,6 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlmodel import SQLModel
 
 from app.models import *  # noqa
 from app.settings import settings
@@ -26,7 +25,6 @@ async def get_session() -> AsyncSession:
         async with SessionLocal() as session:
             yield session
     except Exception as e:
-        print(e)
         raise e
 
 

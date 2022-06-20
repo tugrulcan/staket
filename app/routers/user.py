@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db import ActiveSession, get_session
+from app.db import ActiveSession
 from app.models.user import User, UserCreate, UserDisplay
 
 router = APIRouter(
@@ -17,9 +17,9 @@ router = APIRouter(
     path="/", status_code=status.HTTP_200_OK, response_model=List[UserDisplay]
 )
 async def get_all_users(
-        session: AsyncSession = ActiveSession,
-        offset: int = 0,
-        limit: int = Query(default=50, lte=50),
+    session: AsyncSession = ActiveSession,
+    offset: int = 0,
+    limit: int = Query(default=50, lte=50),
 ) -> List[UserDisplay]:
     result = await session.execute(select(User).offset(offset).limit(limit))
     users: List[UserDisplay] = result.scalars().all()
@@ -32,8 +32,8 @@ async def get_all_users(
     response_model=UserDisplay,
 )
 async def get_user(
-        session: AsyncSession = ActiveSession,
-        user_id: int = Query(..., gt=0),
+    session: AsyncSession = ActiveSession,
+    user_id: int = Query(..., gt=0),
 ) -> UserDisplay:
     result = await session.execute(select(User).where(User.id == user_id))
     user: Optional[UserDisplay] = result.scalars().first()
@@ -49,12 +49,14 @@ async def get_user(
     path="/", status_code=status.HTTP_201_CREATED, response_model=UserDisplay
 )
 async def create_user_registration(
-        user_create_payload: UserCreate,
-        session: AsyncSession = ActiveSession,
+    user_create_payload: UserCreate,
+    session: AsyncSession = ActiveSession,
 ) -> UserDisplay:
     user: User = User(**user_create_payload.dict())
 
-    result = await session.execute(select(User).where(User.email == user.email))
+    result = await session.execute(
+        select(User).where(User.email == user.email)
+    )
     existing_user: Optional[UserDisplay] = result.scalars().first()
     if existing_user is not None:
         raise HTTPException(
@@ -68,8 +70,8 @@ async def create_user_registration(
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
-        session: AsyncSession = ActiveSession,
-        user_id: int = Query(..., gt=0),
+    session: AsyncSession = ActiveSession,
+    user_id: int = Query(..., gt=0),
 ) -> None:
     result = await session.execute(select(User).where(User.id == user_id))
     user: Optional[UserDisplay] = result.scalars().first()

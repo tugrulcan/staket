@@ -1,15 +1,15 @@
 from random import randint
-from sqlalchemy import select
 from typing import List
 
 import pytest
+
 from faker import Faker
 from fastapi import status
 from fastapi.testclient import TestClient
-from requests import Response
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 from httpx import AsyncClient
+from requests import Response
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User, UserCreate, UserDisplay
 from app.routers.user import router as user_router
@@ -17,9 +17,9 @@ from app.routers.user import router as user_router
 
 @pytest.mark.asyncio
 async def test_user_creation(
-        client: TestClient,
-        session: AsyncSession,
-        faker: Faker,
+    client: TestClient,
+    session: AsyncSession,
+    faker: Faker,
 ) -> None:
     user_create_payload: UserCreate = UserCreate(
         name=faker.name(),
@@ -43,12 +43,37 @@ async def test_user_creation(
 
 
 @pytest.mark.asyncio
-async def test_get_all_users(
-        client: TestClient,
-        session: AsyncSession,
-        faker: Faker,
+async def test_user_creation_with_existing_email(
+    client: TestClient,
+    session: AsyncSession,
+    faker: Faker,
 ) -> None:
-    users = await insert_users(session=session, count=randint(1, 20), fake=faker)
+    users: List[User] = await insert_users(
+        session=session, count=1, fake=faker
+    )
+    user_create_payload: UserCreate = UserCreate(
+        name=faker.name(),
+        email=users[0].email,
+        password=faker.password(),
+        is_active=faker.pybool(),
+    )
+    async with AsyncClient(app=client.app, base_url="http://test") as ac:
+        response: Response = await ac.post(
+            url=f"{user_router.prefix}/",
+            json=user_create_payload.dict(),
+        )
+    assert response.status_code == status.HTTP_409_CONFLICT
+
+
+@pytest.mark.asyncio
+async def test_get_all_users(
+    client: TestClient,
+    session: AsyncSession,
+    faker: Faker,
+) -> None:
+    users = await insert_users(
+        session=session, count=randint(1, 20), fake=faker
+    )
 
     async with AsyncClient(app=client.app, base_url="http://test") as ac:
         response: Response = await ac.get(url=f"{user_router.prefix}/")
@@ -68,44 +93,88 @@ async def test_get_all_users(
             if user.id == user_in_response.id
         )
         assert (
-                user_in_response == user_in_db
+            user_in_response == user_in_db
         ), "User in response should match with the user in the database"
 
 
-# def insert_users(
-#     session: Session,
-#     faker: Faker,
-#     count: int = 10,
-# ) -> List[User]:
-#     user_create_payloads: List[UserCreate] = [
-#         UserCreate(
-#             name=faker.name(),
-#             email=faker.email(),
-#             password=faker.password(),
-#             is_active=faker.pybool(),
-#         )
-#         for _ in range(count)
-#     ]
-#     users: List[User] = session.query(User).all()
-#     assert len(users) == 0, "No users should be present"
-#     session.add(user_create_payloads[0])
-#     session.commit()
-#     session.add_all(user_create_payloads)
-#     session.commit()
-#     users: List[User] = session.query(User).all()
-#     assert len(users) == count, (
-#         "Number of users should match with the "
-#         "number of users inserted into the "
-#         "database "
-#     )
-#     return users
+@pytest.mark.asyncio
+async def test_get_user(
+    client: TestClient,
+    session: AsyncSession,
+    faker: Faker,
+) -> None:
+    users: List[User] = await insert_users(
+        session=session, count=1, fake=faker
+    )
+    user: UserDisplay = UserDisplay(**users[0].dict())
+
+    async with AsyncClient(app=client.app, base_url="http://test") as ac:
+        response: Response = await ac.get(
+            url=f"{user_router.prefix}/{user.id}"
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    assert response.json() == user.dict()
+
+
+@pytest.mark.asyncio
+async def test_get_non_existing_user(
+    client: TestClient,
+    session: AsyncSession,
+    faker: Faker,
+) -> None:
+    async with AsyncClient(app=client.app, base_url="http://test") as ac:
+        response: Response = await ac.get(
+            url=f"{user_router.prefix}/{randint(1, 100)}"
+        )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.asyncio
+async def test_delete_user(
+    client: TestClient,
+    session: AsyncSession,
+    faker: Faker,
+) -> None:
+    users: List[User] = await insert_users(
+        session=session, count=1, fake=faker
+    )
+    user: UserDisplay = UserDisplay(**users[0].dict())
+
+    async with AsyncClient(app=client.app, base_url="http://test") as ac:
+        response: Response = await ac.delete(
+            url=f"{user_router.prefix}/{user.id}"
+        )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    # Query DB to check if user was deleted
+    result = await session.execute(select(User))
+    users_in_db: List[User] = result.scalars().all()
+    assert len(users_in_db) == 0, "No users should be present"
+
+
+@pytest.mark.asyncio
+async def test_delete_non_existing_user(
+    client: TestClient,
+    session: AsyncSession,
+    faker: Faker,
+) -> None:
+    async with AsyncClient(app=client.app, base_url="http://test") as ac:
+        response: Response = await ac.delete(
+            url=f"{user_router.prefix}/{randint(1, 100)}"
+        )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.asyncio
 async def insert_users(
-        session: AsyncSession,
-        count: int = 10,
-        fake: Faker = Faker(),
+    session: AsyncSession,
+    count: int = 10,
+    fake: Faker = Faker(),
 ) -> List[User]:
     # session: AsyncSession = await session
 
@@ -130,7 +199,7 @@ async def insert_users(
         )
     result = await session.execute(select(User))
     await session.commit()
-    users: List[User] = result.scalars().all()
+    users = result.scalars().all()
 
     assert len(users) == count, (
         "Number of users should match with the "
