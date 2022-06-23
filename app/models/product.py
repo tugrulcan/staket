@@ -44,6 +44,10 @@ class Product(ProductCreate, table=True):  # type: ignore
 
     category: Optional[Category] = Relationship(
         back_populates="products",
+        sa_relationship_kwargs=dict(
+            cascade="all, delete-orphan",
+            uselist=False,
+        ),
     )
 
     class Config:
