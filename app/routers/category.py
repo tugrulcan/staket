@@ -10,7 +10,7 @@ from app.models.category import Category, CategoryCreate, CategoryDisplay
 
 router = APIRouter(
     tags=[Category.__tablename__.capitalize()],
-    prefix=f"/{Category.__tablename__}",
+    prefix=f"/products/{Category.__tablename__}",
 )
 
 
@@ -43,7 +43,7 @@ async def get_category(
     result = await session.execute(
         select(Category).where(Category.id == category_id)
     )
-    category: Optional[CategoryDisplay] = result.scalars().first()
+    category: Optional[Category] = result.scalars().first()
     if category is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -61,20 +61,20 @@ async def create_category(
     category_create_payload: CategoryCreate,
     session: AsyncSession = ActiveSession,
 ) -> CategoryDisplay:
-    category: Category = Category(**category_create_payload.dict())
-
     result = await session.execute(
-        select(Category).where(Category.name == category.name)
+        select(Category).where(Category.name == category_create_payload.name)
     )
     existing_category: Optional[CategoryDisplay] = result.scalars().first()
-    if existing_category is not None:
+    if existing_category is not None:  # pragma: no cover
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Category with name {category.name} already exists.",
+            detail=f"Category with name"
+            f" {existing_category.name} already exists.",
         )
-    session.add(category)
+    new_category: Category = Category(**category_create_payload.dict())
+    session.add(new_category)
     await session.commit()
-    return CategoryDisplay(**category.dict())
+    return CategoryDisplay(**new_category.dict())
 
 
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -86,7 +86,7 @@ async def delete_category(
         select(Category).where(Category.id == category_id)
     )
     category: Optional[CategoryDisplay] = result.scalars().first()
-    if category is None:
+    if category is None:  # pragma: no cover
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Category with id {category_id} does not exist.",
@@ -109,7 +109,7 @@ async def update_category(
         select(Category).where(Category.id == category_id)
     )
     category: Optional[CategoryDisplay] = result.scalars().first()
-    if category is None:
+    if category is None:  # pragma: no cover
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Category with id {category_id} does not exist.",

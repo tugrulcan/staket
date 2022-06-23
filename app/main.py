@@ -6,6 +6,7 @@ from starlette.responses import RedirectResponse, Response
 
 from app.db import ActiveSession
 from app.routers.category import router as category_router
+from app.routers.product import router as product_router
 from app.routers.user import router as user_router
 
 better_exceptions.MAX_LENGTH = None
@@ -32,6 +33,7 @@ app = FastAPI(
 
 app.include_router(user_router)
 app.include_router(category_router)
+app.include_router(product_router)
 
 
 @app.get("/")
@@ -53,3 +55,9 @@ async def check_db_readiness(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Database is not ready.",
         )
+
+
+if __name__ == "__main__":  # pragma: no cover
+    import uvicorn
+
+    uvicorn.run(app, host="localhost", port=8000)

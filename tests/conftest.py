@@ -17,17 +17,12 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlmodel import SQLModel
 
 from app import db
-
-# from app.models import *
-from app.models.category import (  # noqa
-    Category,
-    CategoryCreate,
-    CategoryDisplay,
-)
-from app.models.user import User, UserCreate, UserDisplay  # noqa
-from app.settings import settings
+from app.models.category import Category, CategoryCreate
 
 # Source: https://gist.github.com/kampikd/513f67b0aa757da766b8ad3c795281ee#file-pytest_transactions_full-py  # noqa
+from app.models.product import Product, ProductCreate
+from app.models.user import User, UserCreate, UserDisplay  # noqa
+from app.settings import settings
 
 
 @pytest.fixture()
@@ -44,6 +39,10 @@ async def connection() -> AsyncGenerator[AsyncConnection, None]:
 
 @pytest.fixture()
 async def setup_database(connection: AsyncConnection) -> None:
+    from app.models.category import Category  # noqa
+    from app.models.product import Product  # noqa
+    from app.models.user import User  # noqa
+
     await connection.run_sync(SQLModel.metadata.create_all)
 
 
@@ -156,3 +155,47 @@ async def insert_categories(
     )
 
     return categories
+
+
+@pytest.mark.asyncio
+async def insert_products(
+    session: AsyncSession,
+    count: int = 10,
+    fake: Faker = Faker(),
+) -> List[Product]:
+    fake.add_provider(faker_commerce.Provider)
+    categories: List[Category] = await insert_categories(
+        session=session, count=count, fake=fake
+    )
+
+    product_create_payloads: List[ProductCreate] = [
+        ProductCreate(
+            name=fake.ecommerce_name(),
+            description=fake.text(),
+            quantity=fake.pyint(),
+            price=fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+            category_id=categories[0].id,
+        )
+        for i in range(count)
+    ]
+
+    result = await session.execute(select(Product))
+    products: List[Product] = result.scalars().all()
+    assert len(products) == 0, "No products should be present"
+
+    # Insert products in product_create_payloads list
+    for product_create_payload in product_create_payloads:
+        await session.execute(
+            Product.__table__.insert().values(**product_create_payload.dict())
+        )
+    result = await session.execute(select(Product))
+    await session.commit()
+    products = result.scalars().all()
+
+    assert len(products) == count, (
+        "Number of products should match with the "
+        "number of products inserted into the "
+        "database "
+    )
+
+    return products

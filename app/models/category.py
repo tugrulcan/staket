@@ -1,21 +1,27 @@
-from sqlmodel import Field, SQLModel
+from typing import List
+
+from sqlmodel import Field, Relationship, SQLModel
 
 
 class CategoryBase(SQLModel, table=False):  # type: ignore
     __abstract__ = True
 
-    name: str = Field(default=None, max_length=50)
+    name: str = Field(
+        default=None,
+        min_length=3,
+        max_length=50,
+    )
 
     class Config:
         orm_mode = True
 
 
-class CategoryDisplay(CategoryBase):
+class CategoryDisplay(CategoryBase, table=False):  # type: ignore
     __abstract__ = True
     id: int
 
 
-class CategoryCreate(CategoryBase):
+class CategoryCreate(CategoryBase, table=False):  # type: ignore
     pass
 
 
@@ -26,6 +32,14 @@ class Category(CategoryCreate, table=True):  # type: ignore
         default=None,
         primary_key=True,
         sa_column_kwargs=dict(autoincrement=True),
+    )
+
+    products: List["Product"] = Relationship(  # type: ignore # noqa
+        back_populates="category",
+        sa_relationship_kwargs=dict(
+            cascade="all, delete-orphan",
+            uselist=True,
+        ),
     )
 
     class Config:
