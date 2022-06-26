@@ -1,9 +1,8 @@
 name: Pre-commit auto-update
 
-#on:
-#  schedule:
-#    - cron: "0 18 * * *"
-on: [ push ]
+on:
+  schedule:
+    - cron: "0 18 * * *"
 env:
   PYTHON_VERSION: "3.10"
   POETRY_VERSION: "1.1.13"
@@ -24,6 +23,7 @@ jobs:
           poetry env use ${{ env.PYTHON_VERSION }}
 
       - run: poetry run pre-commit autoupdate
+      - run:  poetry lock -n
 
       - uses: peter-evans/create-pull-request@v4
         with:
