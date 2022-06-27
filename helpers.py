@@ -22,7 +22,7 @@ def is_hash(pw: str) -> bool:
 
 
 def verify_password(stored_password: str, provided_password: str) -> bool:
-    """Verify a stored password against one provided by user"""
+    """Verify a stored password against one provided by user."""
     import binascii
     import hashlib
 

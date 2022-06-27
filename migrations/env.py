@@ -43,7 +43,6 @@ def run_migrations_offline() -> None:
 
     Calls to context.execute() here emit the given string to the
     script output.
-
     """
     context.configure(
         url=settings.SQLALCHEMY_DATABASE_URI,
@@ -66,9 +65,8 @@ def do_run_migrations(connection: Connection) -> None:
 async def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
+    In this scenario we need to create an Engine and associate a connection
+    with the context.
     """
     connectable = AsyncEngine(
         engine_from_config(

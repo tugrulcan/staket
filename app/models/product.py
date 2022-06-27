@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -47,14 +47,6 @@ class Product(ProductCreate, table=True):  # type: ignore
         sa_relationship_kwargs=dict(
             cascade="all, delete-orphan",
             uselist=False,
-        ),
-    )
-
-    cart_items: List["CartItem"] = Relationship(  # type: ignore # noqa
-        back_populates="product",
-        sa_relationship_kwargs=dict(
-            cascade="all, delete-orphan",
-            uselist=True,
         ),
     )
 

@@ -1,9 +1,8 @@
-"""init alembic
+"""init alembic.
 
 Revision ID: 798540c2eae1
 Revises:
 Create Date: 2022-06-06 23:04:40.848117
-
 """
 import sqlalchemy as sa
 import sqlmodel

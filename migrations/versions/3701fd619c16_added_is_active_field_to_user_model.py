@@ -1,9 +1,8 @@
-"""Added is_active field to user model
+"""Added is_active field to user model.
 
 Revision ID: 3701fd619c16
 Revises: 798540c2eae1
 Create Date: 2022-06-06 23:08:51.764776
-
 """
 import sqlalchemy as sa
 
