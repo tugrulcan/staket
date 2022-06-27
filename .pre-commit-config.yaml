@@ -8,12 +8,12 @@ repos:
     hooks:
       - id: poetry-check
       - id: poetry-lock
-#      - id: poetry-export
-#        name: poetry-export requirements
-#        args: ["-o", "app/requirements.txt" ]
-#      - id: poetry-export
-#        name: poetry-export dev requirements
-#        args: ["-o", "app/requirements-dev.txt", "--dev" ]
+      - id: poetry-export
+        name: poetry-export requirements
+        args: ["-o", "app/requirements.txt" ]
+      - id: poetry-export
+        name: poetry-export dev requirements
+        args: ["-o", "app/requirements-dev.txt", "--dev" ]
 
   - repo: https://github.com/PyCQA/bandit
     rev: '1.7.4'

@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import RedirectResponse, Response
 
 from app.db import ActiveSession
+from app.routers.cart import router as cart_router
 from app.routers.category import router as category_router
 from app.routers.product import router as product_router
 from app.routers.user import router as user_router
@@ -34,6 +35,7 @@ app = FastAPI(
 app.include_router(user_router)
 app.include_router(category_router)
 app.include_router(product_router)
+app.include_router(cart_router)
 
 
 @app.get("/")

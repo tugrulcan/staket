@@ -17,11 +17,12 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlmodel import SQLModel
 
 from app import db
+from app.main import app
 from app.models.category import Category, CategoryCreate
 
 # Source: https://gist.github.com/kampikd/513f67b0aa757da766b8ad3c795281ee#file-pytest_transactions_full-py  # noqa
-from app.models.product import Product, ProductCreate
-from app.models.user import User, UserCreate, UserDisplay  # noqa
+from app.models.product import Product,ProductCreate
+from app.models.user import User, UserCreate
 from app.settings import settings
 
 
@@ -39,9 +40,6 @@ async def connection() -> AsyncGenerator[AsyncConnection, None]:
 
 @pytest.fixture()
 async def setup_database(connection: AsyncConnection) -> None:
-    from app.models.category import Category  # noqa
-    from app.models.product import Product  # noqa
-    from app.models.user import User  # noqa
 
     await connection.run_sync(SQLModel.metadata.create_all)
 
@@ -69,7 +67,6 @@ async def session(
 
 @pytest.fixture()
 def client(session: Session) -> Generator[TestClient, None, None]:
-    from app.main import app
 
     app.dependency_overrides[db.get_session] = lambda: session
 
