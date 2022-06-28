@@ -37,7 +37,7 @@ repos:
           - linkify-it-py
 
   - repo: https://github.com/myint/docformatter
-    rev: v1.3.1
+    rev: v1.4
     hooks:
       - id: docformatter
         args: [ "--in-place", "--wrap-descriptions", "79" ]
@@ -72,7 +72,7 @@ repos:
       - id: isort
 
   - repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 22.6.0
     hooks:
       - id: black
 
