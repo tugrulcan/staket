@@ -46,3 +46,7 @@ faker-commerce = "^1.0.3"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.bandit]
+skips = ["B101", "B106", "B311"]
+exclude = [".tox", ".git", ".eggs", "__pycache__", "tests/", "docs/", "build/", "dist/", "venv/"]
