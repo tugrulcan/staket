@@ -20,7 +20,6 @@ class ProductBase(SQLModel, table=False):  # type: ignore
 class ProductDisplay(ProductBase):
     __abstract__ = True
     id: int
-    # category: Optional["Category"] = None  # type: ignore
     category: Optional[Category]
 
 
@@ -46,6 +45,7 @@ class Product(ProductCreate, table=True):  # type: ignore
         back_populates="products",
         sa_relationship_kwargs=dict(
             uselist=False,
+            lazy="selectin",
         ),
     )
 
@@ -54,6 +54,7 @@ class Product(ProductCreate, table=True):  # type: ignore
         sa_relationship_kwargs=dict(
             cascade="all, delete-orphan",
             uselist=True,
+            lazy="selectin",
         ),
     )
 

@@ -61,7 +61,7 @@ async def test_get_all_products(
         session=session, count=product_count, fake=faker
     )
     products: List[ProductDisplay] = [
-        ProductDisplay(**product.dict()) for product in products_in_db
+        ProductDisplay.from_orm(product) for product in products_in_db
     ]
 
     async with AsyncClient(app=client.app, base_url="http://test") as ac:

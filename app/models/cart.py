@@ -6,6 +6,7 @@ import sqlalchemy
 from sqlalchemy import Column, DateTime, ForeignKey
 from sqlmodel import Field, Relationship, SQLModel
 
+from app.models.product import Product
 from app.models.user import User
 
 
@@ -75,7 +76,7 @@ class CartItem(SQLModel, table=True):  # type: ignore
         ),
     )
 
-    product: "Product" = Relationship(  # type: ignore # noqa
+    product: Product = Relationship(
         back_populates="cart_items",
         sa_relationship_kwargs=dict(
             uselist=False,
@@ -93,3 +94,22 @@ class CartItem(SQLModel, table=True):  # type: ignore
     class Config:
         orm_mode = True
         arbitrary_types_allowed = True
+
+
+class CartItemDisplay(SQLModel):
+    __abstract__ = True
+    id: int
+    product: Product
+    created_date: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class CartDisplay(SQLModel):
+    __abstract__ = True
+    id: int
+    cart_items: List[CartItemDisplay]
+
+    class Config:
+        orm_mode = True

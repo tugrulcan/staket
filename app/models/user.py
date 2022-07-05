@@ -1,6 +1,6 @@
 from pydantic import EmailStr, validator
 from sqlalchemy import Column, String
-from sqlmodel import Field, SQLModel, Relationship
+from sqlmodel import Field, Relationship, SQLModel
 
 from helpers import hash_password, is_hash, verify_password
 
@@ -39,7 +39,7 @@ class User(UserCreate, table=True):  # type: ignore
         sa_column_kwargs=dict(autoincrement=True),
     )
 
-    cart: "Cart" = Relationship(
+    cart: "Cart" = Relationship(  # type: ignore # noqa
         back_populates="user_cart",
         sa_relationship_kwargs=dict(
             uselist=False,
