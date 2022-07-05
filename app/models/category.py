@@ -37,7 +37,6 @@ class Category(CategoryCreate, table=True):  # type: ignore
     products: List["Product"] = Relationship(  # type: ignore # noqa
         back_populates="category",
         sa_relationship_kwargs=dict(
-            cascade="all, delete-orphan",
             uselist=True,
         ),
     )

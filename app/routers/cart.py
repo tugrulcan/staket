@@ -1,14 +1,14 @@
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
-from app.models.product import Product
-from app.models.user import User
-from models.cart import Cart, CartItem
+from app.models.cart import Cart, CartItem
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from app.db import ActiveSession
+from app.models.product import Product
+from app.models.user import User
 
 router = APIRouter(
     tags=[Cart.__tablename__.capitalize()],
@@ -42,38 +42,41 @@ async def add_to_cart(
     demo_user = await session.execute(select(User).where(User.id == 1))
     user: Optional[User] = demo_user.scalars().first()
     if user is None:
-        result = await session.execute(
-            insert(User).values(
-                User(
+        user: User = User(
                     id=1,
                     name="Demo User",
                     email="demo@demo.com",
                     is_active=True,
                     password="demo",
                 )
-            )
-        )
-        user: Optional[User] = result.scalars().first()
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+
         assert user is not None
 
-    result = await session.execute(select(Cart).where(Cart.user_id == user.id))
+    result = await session.execute(
+        select(Cart).where(Cart.user_id == user.id)  # type: ignore
+    )
     cart: Optional[Cart] = result.scalars().first()
     if cart is None:
-        result = await session.execute(
-            insert(Cart).values(
-                Cart(
-                    user_id=user.id,
-                )
-            )
+        cart: Cart = Cart(
+            user_id=user.id,
+            cart_items=[CartItem(
+                product_id=product.id,
+                quantity=1,
+            )],
         )
-        cart: Optional[Cart] = result.scalars().first()
-
-    cart_item = CartItem(
-        cart_id=cart.id,
-        product_id=product.id,
-        quantity=1,
-    )
-    session.add(cart_item)
-    await session.commit()
-    await session.refresh(cart_item)
+        session.add(cart)
+        await session.commit()
+        await session.refresh(cart)
+    else:
+        cart.cart_items.append(CartItem(
+            cart_id=cart.id,
+            product_id=product.id,
+            quantity=1,
+        ))
+        session.add(cart)
+        await session.commit()
+        await session.refresh(cart)
     return {"status": "Item added to cart"}

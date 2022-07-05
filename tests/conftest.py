@@ -21,7 +21,7 @@ from app.main import app
 from app.models.category import Category, CategoryCreate
 
 # Source: https://gist.github.com/kampikd/513f67b0aa757da766b8ad3c795281ee#file-pytest_transactions_full-py  # noqa
-from app.models.product import Product,ProductCreate
+from app.models.product import Product, ProductCreate
 from app.models.user import User, UserCreate
 from app.settings import settings
 
