@@ -123,7 +123,7 @@ async def remove_cart_item_by_id(
 
     result = await session.execute(select(Cart).where(Cart.user_id == user.id))
     cart: Optional[Cart] = result.scalar_one_or_none()
-    if cart is None:
+    if cart is None:  # pragma: no cover
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Cart does not exist.",

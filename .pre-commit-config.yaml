@@ -19,12 +19,15 @@ repos:
     rev: '1.7.4'
     hooks:
     - id: bandit
-      args: ["--exclude", "tests,docs,build,dist,venv"]
+      additional_dependencies:
+        - bandit[toml]
+      args: ["-v", "-c", "pyproject.toml"]
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.1.0
     hooks:
       - id: codespell
+        args: ["-L", "selectin"]
 
   - repo: https://github.com/executablebooks/mdformat
     rev: 0.7.14
