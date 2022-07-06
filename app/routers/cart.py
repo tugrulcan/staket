@@ -47,7 +47,7 @@ async def add_to_cart(
             name="Demo User",
             email="demo@demo.com",
             is_active=True,
-            password="demo",
+            password="demo",  # pragma: allowlist secret
         )
         session.add(user)
         await session.commit()

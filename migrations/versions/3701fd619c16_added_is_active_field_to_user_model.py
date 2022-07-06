@@ -9,8 +9,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "3701fd619c16"
-down_revision = "798540c2eae1"
+revision = "3701fd619c16"  # pragma: allowlist secret
+down_revision = "798540c2eae1"  # pragma: allowlist secret
 branch_labels = None
 depends_on = None
 
