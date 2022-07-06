@@ -23,7 +23,6 @@ jobs:
           poetry env use ${{ env.PYTHON_VERSION }}
 
       - run: poetry run pre-commit autoupdate
-      - run:  poetry lock -n
 
       - uses: peter-evans/create-pull-request@v4
         with:
