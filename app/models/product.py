@@ -58,6 +58,14 @@ class Product(ProductCreate, table=True):  # type: ignore
         ),
     )
 
+    order_details: List["OrderDetails"] = Relationship(  # type: ignore # noqa
+        back_populates="product",
+        sa_relationship_kwargs=dict(
+            cascade="all, delete-orphan",
+            uselist=True,
+        ),
+    )
+
     class Config:
         orm_mode = True
         arbitrary_types_allowed = True

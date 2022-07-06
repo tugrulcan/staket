@@ -31,7 +31,9 @@ sqlmodel = "0.0.6"
 starlette = "0.19.1"
 uvicorn = {version = "0.17.6", extras = ["standard"]}
 email-validator = "^1.2.1"
-setuptools = "^62.6.0"
+setuptools = "62.6.0"
+SQLAlchemy = "1.4.35"
+SQLAlchemy-Utils = "^0.38.2"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "2.19.0"

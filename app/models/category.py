@@ -38,6 +38,7 @@ class Category(CategoryCreate, table=True):  # type: ignore
         back_populates="category",
         sa_relationship_kwargs=dict(
             uselist=True,
+            lazy="selectin",
         ),
     )
 

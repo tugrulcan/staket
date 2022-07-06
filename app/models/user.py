@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import EmailStr, validator
 from sqlalchemy import Column, String
 from sqlmodel import Field, Relationship, SQLModel
@@ -43,6 +45,14 @@ class User(UserCreate, table=True):  # type: ignore
         back_populates="user_cart",
         sa_relationship_kwargs=dict(
             uselist=False,
+        ),
+    )
+
+    orders: List["Order"] = Relationship(  # type: ignore # noqa
+        back_populates="user_info",
+        sa_relationship_kwargs=dict(
+            uselist=True,
+            lazy="selectin",
         ),
     )
 
