@@ -31,3 +31,8 @@ jobs:
           title: Update pre-commit hooks
           commit-message: "chore: update pre-commit hooks"
           body: Update versions of pre-commit hooks to latest version.
+          reviewers: tugrulcan
+          labels: |
+            pre-commit update
+            automated pr
+
