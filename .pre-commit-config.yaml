@@ -80,7 +80,7 @@ repos:
       - id: black
 
   - repo: https://github.com/hadialqattan/pycln
-    rev: "v2.0.3"
+    rev: "v2.0.4"
     hooks:
     - id: pycln
       args: [ --config=setup.cfg ]
@@ -105,7 +105,7 @@ repos:
     - id: yesqa
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: "v2.37.1"
+    rev: "v2.37.2"
     hooks:
     - id: pyupgrade
       args: ["--py38-plus"]
