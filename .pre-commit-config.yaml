@@ -65,7 +65,7 @@ repos:
       - id: hadolint
 
   -   repo: https://github.com/asottile/setup-cfg-fmt
-      rev: v1.20.2
+      rev: v2.0.0
       hooks:
       -   id: setup-cfg-fmt
 
@@ -87,7 +87,7 @@ repos:
 
 
   - repo: https://github.com/pycqa/flake8
-    rev: '5.0.0'
+    rev: '5.0.3'
     hooks:
       - id: flake8
         additional_dependencies:
@@ -100,7 +100,7 @@ repos:
           - flake8-pytest-style==1.6.0
 
   - repo: https://github.com/asottile/yesqa
-    rev: "v1.3.0"
+    rev: "v1.4.0"
     hooks:
     - id: yesqa
 
